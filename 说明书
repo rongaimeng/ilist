@@ -1,0 +1,40 @@
+高性能高并发webapi
+1.安全
+1.1 身份认证  authortication
+1.2 url授权  authorization
+
+2.跨域
+2.1 标准的Content-Type只支持application/x-www-form-urlencoded, multipart/form-data, 或text/plain，也就是说application/json不是标准
+    的Content-Type
+    接收请求的网站，需要设置允许
+    Access-Control-Allow-Origin:* Access-Control-Allow-Methods:GET, POST, PUT, DELETE, OPTIONS Access-Control-Allow-Headers:Content-Type
+    一旦跨域发application/json的数据，就会遇到这个问题。application/json跨域时，要特殊处理的，它不是标准3中请求格式之一，跨域时会引发预检请求。
+    会先发一个OPTION请求，预检通过后才会发真正的请求
+    
+3.降级熔断限流+MQ
+  背景：系统做活动、秒杀、攻击，为防止网站意外暴增的流量，导致整个系统瘫痪
+3.1 降级，如淘宝双11就把评论、统计等非核心业务降级处理，防止这些业务被攻击导致活动业务不正常
+3.2 熔断，如A业务调用B业务，B挂了，系统对A的调用就直接拒绝，减少对B的调用。此处写一个api调用代理类，发现网络超时、慢过多，下次就直接拒绝
+3.3 限流，在前后端接口服务处进行流量限制是非常有必要的
+3.4 MQ，异步非阻塞，增加并发处理能力
+
+4.缓存Redis
+4.1 缓存命中率 雪崩 击穿
+4.2 持久化：rdb快照(默认模式)   AOF
+4.2.1 将内存中的数据以快照的方式写入二进制文件中，默认的文件名是dump.rdb
+      redis.conf配置：
+      save 900 1 
+      save 300 10
+      save 60 10000
+      默认是如上配置：900秒之内，如果超过1个key被修改，则发起快照保存；
+                     300秒内，如果超过10个key被修改，则发起快照保存
+                     1分钟之内，如果1万个key被修改，则发起快照保存
+rdb不能完全保证数据持久化，因为是定时保存，所以当redis服务down掉，就会丢失一部分数据，而且数据量大，写操作多的情况下，会引起大量的磁盘IO操作，会影响性能。
+所以，如果这两种方式同时开启，如果对数据进行恢复，不应该用rdb持久化方式对数据库进行恢复。
+4.2.2 使用aof做持久化，每一个写命令都通过write函数追加到appendonly.aof中.
+      配置方式：启动aof持久化的方式 
+      appendonly yes 
+5.其他
+5.1 最快的序列化工具ServiceStack.Text替换Json.net
+5.2 压缩响应，在你的ASP.NET Web API中使用GZIP 或 Deflate 。这是一个非常有必要使用的功能
+5.3 使用Dapper
