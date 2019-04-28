@@ -1,3 +1,4 @@
-下载安装windows版本的redis地址：https://github.com/MicrosoftArchive/redis/releases/tag/win-3.2.100
+下载安装windows版本的redis地址：
+服务端：https://github.com/MicrosoftArchive/redis/releases/tag/win-3.2.100  客户端：https://github.com/caoxinyu/RedisClient/releases
 https://blog.csdn.net/hengyunabc/article/details/19433779
 https://blog.csdn.net/sunlihuo/article/details/79700225
